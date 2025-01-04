@@ -1,6 +1,6 @@
-# Vagrant Setup for Rocky Linux 9.5
+# Vagrant Setup using Rocky Linux 9.5
 
-This Vagrant setup is based on Rocky Linux 9.5 and is designed for Ansible testing.
+This Vagrant setup is based on Rocky Linux 9.5  for Ansible testing.
 
 > [!IMPORTANT]  
 > **Resource Links**: [bookmarks.nimendra.xyz/vagrant](https://bookmarks.nimendra.xyz/bookmarks/shared?q=%23vagrant)  

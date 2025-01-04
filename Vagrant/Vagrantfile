@@ -1,0 +1,44 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # https://dl.rockylinux.org/vault/rocky/9.5/images/x86_64/Rocky-9-Vagrant-Vbox.latest.x86_64.box
+  config.vm.box = "rockybox"
+
+  config.vm.box_check_update = false
+
+  # NOTE: This will enable public access to the opened port
+  config.vm.network "forwarded_port", guest: 80, host: 8088, host_ip: "127.0.0.1"
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  # config.vm.network "private_network", ip: "192.168.33.10"
+
+  # config.vm.network "public_network"
+
+  config.vm.synced_folder "../.", "/sync_data", type: "rsync"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.gui = false
+    vb.cpus = 2
+    vb.memory = "2048"
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    # Create a new user
+    sudo useradd -m -s /bin/bash nimendra
+
+    # Set a password for the user (optional)
+    echo "nimendra:nimendra" | sudo chpasswd
+
+    # Add the new user to the sudo group
+    sudo usermod -aG wheel nimendra 
+
+    # Copy SSH keys to the new user for Vagrant access
+    sudo mkdir -p /home/nimendra/.ssh
+    sudo cp /home/vagrant/.ssh/authorized_keys /home/nimendra/.ssh/
+    sudo chown -R nimendra:nimendra /home/nimendra/.ssh
+    sudo chmod 700 /home/nimendra/.ssh
+    sudo chmod 600 /home/nimendra/.ssh/authorized_keys
+  SHELL
+end

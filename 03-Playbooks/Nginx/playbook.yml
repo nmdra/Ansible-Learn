@@ -1,0 +1,45 @@
+---
+- name: Configure Nginx
+  hosts: webserver
+  become: yes
+
+  tasks:
+    - name: Ensure Nginx Install
+      ansible.builtin.package: name=nginx update_cache=yes
+
+    - name: Copy files
+      ansible.builtin.copy:
+        src: nginx.conf
+        dest: /etc/nginx/nginx.conf
+ 
+    - name: Copy index.xhtml
+      template: >
+        src=index.xhtml.j2
+        dest=/usr/share/nginx/html/index.xhtml
+
+    - name: Restart nginx
+      service:
+        name: nginx 
+        state: restarted
+
+    - name: Ensure firewalld is installed
+      ansible.builtin.yum:
+        name: firewalld
+        state: present
+
+    - name: Ensure firewalld is running and enabled
+      ansible.builtin.service:
+        name: firewalld
+        state: started
+        enabled: true
+
+    - name: Ensure HTTP service is allowed in the public zone
+      ansible.builtin.firewalld:
+        service: http
+        zone: public
+        state: enabled
+        permanent: true
+
+    - name: Reload firewalld
+      ansible.builtin.command:
+        cmd: firewall-cmd --reload

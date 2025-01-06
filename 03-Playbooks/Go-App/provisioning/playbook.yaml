@@ -1,0 +1,24 @@
+---
+- hosts: all
+  become: true
+
+  vars:
+    app_location: /usr/bin/
+
+  tasks:
+    - name: Ensure the application directory exists
+      ansible.builtin.file:
+        path: "{{ app_location }}"
+        state: directory
+
+    - name: Copy file
+      ansible.builtin.copy:
+        src: ./app/server
+        dest: "{{ app_location }}/server"
+        mode: "0755"
+        owner: root
+        group: root
+
+    - name: Run server
+      command: >
+        "{{ app_location }}/server"

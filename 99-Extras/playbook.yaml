@@ -1,0 +1,28 @@
+---
+- hosts: all
+  become: yes
+
+  tasks:
+    - name: Install Apache
+      dnf:
+        name:
+          - httpd
+          - httpd-devel
+        state: present
+    - name: Copy config files
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: root
+        mode: 0644
+      with_items:
+        - src: httpd.conf
+          dest: /etc/httpd/conf/httpd.conf
+        - src: httpd-vhosts.conf
+          dest: /etc/httpd/conf/httpd-vhosts.conf
+    - name: Make sure APache is started now and at boot
+      service:
+        name: httpd
+        state: started
+        enabled: yes

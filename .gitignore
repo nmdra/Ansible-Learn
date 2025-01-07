@@ -1,2 +1,5 @@
 *.box
 .vagrant
+
+*.key
+*.crt

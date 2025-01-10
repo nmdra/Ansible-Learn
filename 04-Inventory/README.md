@@ -187,8 +187,8 @@ The `add_host` module adds a host to the inventory; this is useful if you’re u
         groups: new_vms
         ansible_user: vagrant
         ansible_port: 2222
-	      ansible_private_key_file: >
-	        .vagrant/machines/default/virtualbox/private_key
+	ansible_private_key_file: >
+		.vagrant/machines/default/virtualbox/private_key
 
 - name: Configure the newly added VM
   hosts: new_vms

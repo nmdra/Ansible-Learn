@@ -1,0 +1,26 @@
+---
+- name: Group tasks with error handling
+  hosts: server
+  tasks:
+    - name: Run a block and handle errors
+      block:
+        - name: Create a file
+          ansible.builtin.file:
+            path: /tmp/testfile
+            state: touch
+
+        - name: Fail if the file doesn't exist
+          ansible.builtin.stat:
+            path: /tmp/testtile # change this value to test this block
+          register: file_status
+          failed_when: file_status.stat.exists == false
+
+      rescue:
+        - name: Handle failure and notify
+          ansible.builtin.debug:
+            msg: "Failed to create or verify the file!"
+
+      always:
+        - name: Always run cleanup
+          ansible.builtin.debug:
+            msg: "Cleaning up after block execution"

@@ -1,0 +1,31 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.ssh.insert_key = false
+  # https://dl.rockylinux.org/vault/rocky/9.5/images/x86_64/Rocky-9-Vagrant-Vbox.latest.x86_64.box
+  config.vm.box = "rockylinux/9"
+
+  config.vm.box_check_update = false
+
+  # NOTE: This will enable public access to the opened port
+  config.vm.network "forwarded_port", guest: 80, host: 8088, host_ip: "127.0.0.1"
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  config.vm.network "private_network", ip: "192.168.56.7"
+
+  # config.vm.network "public_network"
+
+  config.vm.synced_folder ".", "/sync_data", type: "rsync"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.gui = false
+    vb.cpus = 2
+    vb.memory = "2048"
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo systemctl disable firewalld --now
+  SHELL
+end

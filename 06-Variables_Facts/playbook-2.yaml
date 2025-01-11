@@ -1,0 +1,100 @@
+---
+- name: Demonstrating Ansible Features
+  hosts: all
+  gather_facts: false
+  vars:
+    is_db_server: true
+    ping_hosts: true
+    is_app_server: true
+    interesting_branch: 'feature-x'
+    webserver_port: 80
+    monitoring_master: 'monitoring.example.com'
+
+  tasks:
+    - name: Install MySQL only on DB servers
+      dnf:
+        name: mysql-server
+        state: present
+      when: is_db_server
+
+    - name: Run the ping-hosts script if ping_hosts is true
+      command: /usr/local/bin/ping-hosts.sh
+      when: ping_hosts
+
+    - name: Check if app is running and only start it if not
+      command: forever list
+      register: forever_list
+
+    - name: Start app if not running
+      command: forever start /path/to/app/app.js
+      when: "'/path/to/app/app.js' not in forever_list.stdout"
+
+    - name: Run git cleanup script for the app server with missing branch
+      command: chdir=/path/to/project git branch
+      register: git_branches
+
+    - name: Run cleanup if the interesting branch is missing
+      command: /path/to/project/scripts/git-cleanup.sh
+      when: "(is_app_server == true) and ('{{ interesting_branch }}' not in git_branches.stdout)"
+
+    - name: Check PHP version and downgrade if necessary
+      shell: php --version
+      register: php_version
+
+    - name: Downgrade PHP if version contains 7.0
+      shell: dnf -y downgrade php*
+      when: "'7.0' in php_version.stdout"
+
+    - name: Copy file only if hosts file does not exist
+      stat:
+        path: /etc/hosts
+      register: hosts_file
+
+    - name: Copy the file if hosts file is missing
+      copy:
+        src: path/to/local/file
+        dest: /path/to/remote/file
+      when: hosts_file.stat.exists == false
+
+    - name: Pause for 10 seconds before continuing
+      wait_for:
+        timeout: 10
+        state: started
+        host: "{{ inventory_hostname }}"
+        port: "{{ webserver_port }}"
+
+    - name: Delegate task to the monitoring master
+      command: monitor-server webservers {{ inventory_hostname }}
+      delegate_to: "{{ monitoring_master }}"
+
+    - name: Run a local action to remove the server from the load balancer
+      local_action: command remove-from-lb {{ inventory_hostname }}
+
+    - name: Wait for a port to be open on localhost
+      local_action:
+        module: wait_for
+        host: 127.0.0.1
+        port: "{{ webserver_port }}"
+        delay: 10
+        timeout: 300
+        state: started
+
+    - name: Print out the current date using local connection
+      local_action: command date
+      register: date
+
+    - name: Print the date
+      debug:
+        var: date.stdout
+
+    - name: Set the state of nginx service using service facts
+      service_facts:
+
+    - name: Set nginx state to a simplified variable
+      set_fact:
+        nginx_state: "{{ ansible_facts.services.nginx.state }}"
+      when: ansible_facts.services.nginx is defined
+
+    - name: Show simplified nginx state
+      debug:
+        msg: "The nginx service state is: {{ nginx_state }}"

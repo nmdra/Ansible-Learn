@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+
+  vars_prompt:
+    - name: share_user
+      prompt: "What is your network username?"
+      private: False
+    - name: share_pass
+      prompt: "What is your network password?"
+      private: True

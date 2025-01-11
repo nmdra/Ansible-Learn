@@ -1,0 +1,35 @@
+---
+- name: Capture and display the current user
+  hosts: server
+  tags: basic_example
+  tasks:
+    - name: Capture output of whoami
+      ansible.builtin.command: whoami
+      register: login
+      tags:
+        - capture_user
+
+    - name: Show output
+      ansible.builtin.debug:
+        var: login
+      tags:
+        - show_output
+
+    - name: Show msg
+      ansible.builtin.debug:
+        msg: "The user running this playbook is: {{ login.stdout }}"
+      tags:
+        - show_msg
+
+    - name: Run Program
+      ansible.builtin.command: /opt/myprog
+      register: result
+      ignore_errors: true
+      tags:
+        - run_program
+
+    - name: Show result
+      ansible.builtin.debug:
+        var: result
+      tags:
+        - show_result

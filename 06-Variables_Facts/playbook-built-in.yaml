@@ -1,0 +1,43 @@
+---
+- name: Demonstrate built-in variables in Ansible
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Display hostvars
+      debug:
+        msg: "{{ hostvars[inventory_hostname] }}"
+
+    - name: Display inventory_hostname
+      debug:
+        msg: "Inventory hostname: {{ inventory_hostname }}"
+
+    - name: Display inventory_hostname_short
+      debug:
+        msg: "Short hostname: {{ inventory_hostname_short }}"
+
+    - name: Display group_names
+      debug:
+        msg: "Current host belongs to these groups: {{ group_names }}"
+
+    - name: Display groups
+      debug:
+        msg: "All groups and their members: {{ groups }}"
+
+    - name: Display ansible_check_mode
+      debug:
+        msg: "Check mode is {{ 'enabled' if ansible_check_mode else 'disabled' }}"
+
+    - name: Display ansible_play_batch
+      debug:
+        msg: "Current batch of hosts in the play: {{ ansible_play_batch }}"
+
+    - name: Display ansible_play_hosts
+      debug:
+        msg: "All hosts in the current play: {{ ansible_play_hosts }}"
+
+    - name: Display ansible_version
+      debug:
+        msg: >
+          "Ansible version: {{ ansible_version.string }} 
+          (major: {{ ansible_version.major }}, minor: {{ ansible_version.minor }}, revision: {{ ansible_version.revision }})"

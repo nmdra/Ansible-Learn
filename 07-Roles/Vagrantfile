@@ -1,0 +1,32 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.ssh.insert_key = false
+  config.vm.define "rockylinux_vm" do |vm_config|
+    # VM settings
+    vm_config.vm.box = "rockylinux/9"
+    vm_config.vm.box_check_update = false
+
+    # Port forwarding
+    vm_config.vm.network "forwarded_port", guest: 80, host: 8088, host_ip: "127.0.0.1"
+
+    # Private network
+    vm_config.vm.network "private_network", ip: "192.168.56.7"
+
+    # Synced folder
+    vm_config.vm.synced_folder ".", "/sync_data", type: "rsync"
+
+    # VirtualBox provider-specific settings
+    vm_config.vm.provider "virtualbox" do |vb|
+      vb.gui = false
+      vb.cpus = 2
+      vb.memory = "2048"
+    end
+
+    # Shell provisioner
+    vm_config.vm.provision "shell", inline: <<-SHELL
+      sudo systemctl disable firewalld --now
+    SHELL
+  end
+end
